@@ -35,7 +35,7 @@ RECORD_NAME="$DOMAIN_NAME" # shalinidaws88s.online
 aws route53 change-resource-record-sets \
   --hosted-zone-id $ZONE_ID \
   --change-batch "{
-    \"Comment\": \"Creating record\",
+    \"Comment\": \"Updating record\",
     \"Changes\": [{
       \"Action\": \"UPSERT\",
       \"ResourceRecordSet\": {
