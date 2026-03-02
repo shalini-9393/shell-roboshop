@@ -52,3 +52,13 @@ VALIDATE $? "Extracting catalogue code"
 cd /app &>> $LOGS_FILE
 npm install &>> $LOGS_FILE
 VALIDATE $? "Installing NodeJS dependencies"
+chown -R roboshop:roboshop /app &>> $LOGS_FILE
+VALIDATE $? "Changing ownership of App Directory"
+cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGS_FILE
+VALIDATE $? "Copying catalogue systemd service file"
+systemctl daemon-reload &>> $LOGS_FILE
+VALIDATE $? "Reloading systemd"
+systemctl enable catalogue &>> $LOGS_FILE
+VALIDATE $? "Enabling catalogue service"
+systemctl start catalogue &>> $LOGS_FILE
+VALIDATE $? "Starting catalogue service"
