@@ -48,23 +48,18 @@ VALIDATE $? "Creating App Directory"
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>> $LOGS_FILE
 VALIDATE $? "Downloading catalogue code"
 
+cd /app &>> $LOGS_FILE
+VALIDATE $? "Moving to app directory"
+
 unzip -o /tmp/catalogue.zip -d /app &>> $LOGS_FILE
 VALIDATE $? "Extracting catalogue code"
 
 npm install &>> $LOGS_FILE
 VALIDATE $? "Installing NodeJS dependencies"
 
-chown -R roboshop:roboshop /app &>> $LOGS_FILE
-VALIDATE $? "Changing ownership of App Directory"
-
 cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGS_FILE
-VALIDATE $? "Copying catalogue systemd service file"
-
+VALIDATE $? "Created Systemctl Service"
 systemctl daemon-reload &>> $LOGS_FILE
-VALIDATE $? "Reloading systemd"
-
-systemctl enable catalogue &>> $LOGS_FILE
-VALIDATE $? "Enabling catalogue service"
-
-systemctl start catalogue &>> $LOGS_FILE
-VALIDATE $? "Starting catalogue service"
+systemctl enable catalogue 
+systemctl start catalogue
+VALIDATE $? "Starting catalogue"
