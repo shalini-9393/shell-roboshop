@@ -22,21 +22,21 @@ VALIDATE() {
         echo -e "$G $2 installing successfully. $N" | tee -a $LOGS_FILE
     fi
 }
-cp mongodb.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
+cp mongodb.repo /etc/yum.repos.d/mongodb.repo 
 VALIDATE $? "Copying Mongo Repo"
 
-dnf install mongodb-org -y &>> $LOGS_FILE
+dnf install mongodb-org -y 
 VALIDATE $? "Installing MongoDB Server"
 
-systemctl enable mongodb &>> $LOGS_FILE
+systemctl enable mongodb 
 VALIDATE $? "Enable MongoDB"
 
-systemctl start mongodb &>> $LOGS_FILE
+systemctl start mongodb 
 VALIDATE $? "Start MongoDB"
 
-sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf &>> $LOGS_FILE
+sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
 VALIDATE $? "Allowing Remote Connections"
 
-systemctl restart mongodb &>> $LOGS_FILE
+systemctl restart mongodb
 VALIDATE $? "Restarting MongoDB" 
 
