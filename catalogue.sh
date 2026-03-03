@@ -37,8 +37,8 @@ VALIDATE $? "Installing NodeJS"
 
 id roboshop &>> $LOGS_FILE
 if [ $? -ne 0 ]; then
- useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>> $LOGS_FILE
- VALIDATE $? "Creating system User"
+ chown -R roboshop:roboshop /app &>> $LOGS_FILE
+VALIDATE $? "Changing ownership to roboshop"
  else
     echo -e "$G User roboshop already exists. $N" | tee -a $LOGS_FILE
 fi
@@ -64,3 +64,18 @@ systemctl daemon-reload &>> $LOGS_FILE
 systemctl enable catalogue &>> $LOGS_FILE
 systemctl start catalogue &>> $LOGS_FILE
 VALIDATE $? "Starting catalogue"
+
+cp $SCROPT_DIR/mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
+dnf install mongodb-mongosh -y
+
+INDEX=mongosh --host $MONGODB_HOST  --quiet --eval 'db.getMongo().getDBnames().indexOf("catalogue")' &>> $LOGS_FILE
+if [ $INDEX -le = 0 ];then
+mongosh --host $MONGODB_HOST </app/db/master-data.js &>> $LOGS_FILE
+VALIDATE $? "Loading products"
+else
+echo -e products are already loaded ... $Y SKIPPING $N
+fi
+
+systemctl restart catalogue &>> $LOGS_FILE
+VALIDATE $? "Restarting catalogue"
+
