@@ -57,7 +57,7 @@ VALIDATE $? "Extracting catalogue code"
 npm install &>> $LOGS_FILE
 VALIDATE $? "Installing NodeJS dependencies"
 
-cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGS_FILE
+cp /home/ec2-user/shell-roboshop/catalogue.service /etc/systemd/system/catalogue.service &>> $LOGS_FILE
 VALIDATE $? "Created Systemctl Service"
 
 systemctl daemon-reload &>> $LOGS_FILE
