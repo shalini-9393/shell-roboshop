@@ -67,6 +67,7 @@ VALIDATE $? "Starting catalogue"
 
 cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
 dnf install mongodb-mongosh -y
+
 if [ $? -le = 0 ]; then
 mongosh --host localhost </app/schema/catalogue.js &>> $LOGS_FILE
 VALIDATE $? "Loading catalogue data"
