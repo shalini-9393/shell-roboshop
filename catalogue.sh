@@ -59,7 +59,8 @@ VALIDATE $? "Installing NodeJS dependencies"
 
 cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGS_FILE
 VALIDATE $? "Created Systemctl Service"
+
 systemctl daemon-reload &>> $LOGS_FILE
-systemctl enable catalogue 
-systemctl start catalogue
+systemctl enable catalogue &>> $LOGS_FILE
+systemctl start catalogue &>> $LOGS_FILE
 VALIDATE $? "Starting catalogue"
