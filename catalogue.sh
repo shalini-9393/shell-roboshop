@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 USERID=$(id -u)
 
 LOGS_FOLDER="/var/log/shell-roboshop"
@@ -60,7 +61,7 @@ npm install &>> $LOGS_FILE
 VALIDATE $? "Installing dependencies"
 
 # Setup service
-cp catalogue.service /etc/systemd/system/catalogue.service
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
 VALIDATE $? "Copying service file"
 
 systemctl daemon-reload
