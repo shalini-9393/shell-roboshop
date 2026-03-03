@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USERid=$(id -u)
+USERID=$(id -u)
 
 LOGS_FOLDER="/var/log/shell-roboshop"
 mkdir -p $LOGS_FOLDER
@@ -9,88 +9,96 @@ LOGS_FILE="$LOGS_FOLDER/$(basename $0).log"
 R='\e[31m'
 G='\e[32m'
 Y='\e[33m'
-B='\e[34m'
 N='\e[0m'
 
-if [ $USERid -ne 0 ]; then
-    echo -e "$R Please run this script as root or with sudo. $N" | tee -a $LOGS_FILE
+if [ $USERID -ne 0 ]; then
+    echo -e "$R Please run this script as root or with sudo. $N"
     exit 1
 fi
 
 VALIDATE() {
     if [ $1 -ne 0 ]; then
-        echo -e "$R $2 failed. $N" | tee -a $LOGS_FILE
+        echo -e "$R $2 failed $N"
         exit 1
     else
-        echo -e "$G $2 successful. $N" | tee -a $LOGS_FILE
+        echo -e "$G $2 successful $N"
     fi
 }
 
+# Install NodeJS
 dnf module disable nodejs -y &>> $LOGS_FILE
-VALIDATE $? "Disabling NodeJS Module"
+VALIDATE $? "Disabling NodeJS"
 
 dnf module enable nodejs:20 -y &>> $LOGS_FILE
-VALIDATE $? "Enabling NodeJS 20 Module"
+VALIDATE $? "Enabling NodeJS 20"
 
-dnf install nodejs -y &>> $LOGS_FILE 
+dnf install nodejs -y &>> $LOGS_FILE
 VALIDATE $? "Installing NodeJS"
 
+# Create roboshop user
 id roboshop &>> $LOGS_FILE
-if [ $INDEX -le 0 ]; then
- chown -R roboshop:roboshop /app &>> $LOGS_FILE
-VALIDATE $? "Changing ownership to roboshop"
- else
-    echo -e "$G User roboshop already exists. $N" | tee -a $LOGS_FILE
+if [ $? -ne 0 ]; then
+    useradd roboshop &>> $LOGS_FILE
+    VALIDATE $? "Creating roboshop user"
+else
+    echo -e "$G User roboshop already exists $N"
 fi
-mkdir -p /app &>> $LOGS_FILE 
-VALIDATE $? "Creating App Directory" 
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>> $LOGS_FILE
-VALIDATE $? "Downloading catalogue code"
+# Create app directory
+mkdir -p /app
+VALIDATE $? "Creating App Directory"
 
-cd /app &>> $LOGS_FILE
-VALIDATE $? "Moving to app directory"
+# Download code
+curl -L -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>> $LOGS_FILE
+VALIDATE $? "Downloading catalogue"
 
-unzip -o /tmp/catalogue.zip -d /app &>> $LOGS_FILE
-VALIDATE $? "Extracting catalogue code"
+cd /app
+unzip -o /tmp/catalogue.zip &>> $LOGS_FILE
+VALIDATE $? "Extracting catalogue"
 
 npm install &>> $LOGS_FILE
-VALIDATE $? "Installing NodeJS dependencies"
+VALIDATE $? "Installing dependencies"
 
-cp /home/ec2-user/shell-roboshop/catalogue.service /etc/systemd/system/catalogue.service &>> $LOGS_FILE
-VALIDATE $? "Created Systemctl Service"
+# Setup service
+cp catalogue.service /etc/systemd/system/catalogue.service
+VALIDATE $? "Copying service file"
 
-systemctl daemon-reload &>> $LOGS_FILE
-systemctl enable catalogue &>> $LOGS_FILE
-systemctl start catalogue &>> $LOGS_FILE
+systemctl daemon-reload
+systemctl enable catalogue
+systemctl start catalogue
 VALIDATE $? "Starting catalogue"
 
-# Copy Mongo repo
-cp mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
-VALIDATE $? "Copying Mongo Repo"
+# ---------------- MONGODB ----------------
 
-# Install MongoDB Server
+# Create Mongo repo directly (NO external file dependency)
+cat <<EOF > /etc/yum.repos.d/mongodb.repo
+[mongodb-org-6.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/
+gpgcheck=0
+enabled=1
+EOF
+
+VALIDATE $? "Creating Mongo Repo"
+
 dnf install mongodb-org -y &>> $LOGS_FILE
-VALIDATE $? "Installing MongoDB Server"
+VALIDATE $? "Installing MongoDB"
 
-# Start MongoDB
-systemctl enable mongod &>> $LOGS_FILE
-systemctl start mongod &>> $LOGS_FILE
+systemctl enable mongod
+systemctl start mongod
 VALIDATE $? "Starting MongoDB"
 
-# Install Mongo Shell
 dnf install mongodb-mongosh -y &>> $LOGS_FILE
 VALIDATE $? "Installing Mongo Shell"
 
-# Check if products collection exists
 INDEX=$(mongosh --host localhost --quiet --eval "db.getMongo().getDB('catalogue').getCollectionNames().indexOf('products')")
 
 if [ -z "$INDEX" ] || [ "$INDEX" -lt 0 ]; then
-  mongosh --host localhost </app/db/master-data.js &>> $LOGS_FILE
-  VALIDATE $? "Loading catalogue data"
+    mongosh --host localhost </app/db/master-data.js
+    VALIDATE $? "Loading catalogue data"
 else
-  echo -e "Products already loaded ... $Y SKIPPING $N" | tee -a $LOGS_FILE
+    echo -e "Products already loaded ... $Y SKIPPING $N"
 fi
 
-systemctl restart catalogue &>> $LOGS_FILE
+systemctl restart catalogue
 VALIDATE $? "Restarting catalogue"
