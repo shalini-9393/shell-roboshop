@@ -36,7 +36,7 @@ dnf install nodejs -y &>> $LOGS_FILE
 VALIDATE $? "Installing NodeJS"
 
 id roboshop &>> $LOGS_FILE
-if [ $? -ne 0 ]; then
+if [ $INDEX -le 0 ]; then
  chown -R roboshop:roboshop /app &>> $LOGS_FILE
 VALIDATE $? "Changing ownership to roboshop"
  else
@@ -65,10 +65,10 @@ systemctl enable catalogue &>> $LOGS_FILE
 systemctl start catalogue &>> $LOGS_FILE
 VALIDATE $? "Starting catalogue"
 
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
-dnf install mongodb-mongosh -y
+cp mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
+dnf install $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongodb.repo mongodb-mongosh -y
 
-INDEX=$(mongosh --host localhost --quiet --eval "db.getMongo().getDB('catalogue')
+INDEX=$(mongosh --host localhost --quiet --eval "db.getMongo().getDB('catalogue')")
 
 if [ $? -le = 0 ]; then
   mongosh --host localhost </app/db/master-data.js 
