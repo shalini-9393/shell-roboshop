@@ -68,9 +68,11 @@ VALIDATE $? "Starting catalogue"
 cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
 dnf install mongodb-mongosh -y
 
+INDEX=$(mongosh --host localhost --quiet --eval "db.getMongo().getDB('catalogue')
+
 if [ $? -le = 0 ]; then
-mongosh --host localhost </app/schema/catalogue.js &>> $LOGS_FILE
-VALIDATE $? "Loading catalogue data"
+  mongosh --host localhost </app/db/master-data.js 
+  VALIDATE $? "Loading catalogue data"
 else
 echo -e products are already loaded ... $Y SKIPPING $N
 fi
