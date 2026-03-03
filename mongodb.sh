@@ -32,16 +32,16 @@ VALIDATE $? "Copying Mongo Repo"
 dnf install mongodb-org -y &>> $LOGS_FILE
 VALIDATE $? "Installing MongoDB Server"
 
-systemctl enable mongodb &>> $LOGS_FILE
+systemctl enable mongod &>> $LOGS_FILE
 VALIDATE $? "Enabling MongoDB"
 
-systemctl start mongodb &>> $LOGS_FILE
+systemctl start mongod &>> $LOGS_FILE
 VALIDATE $? "Starting MongoDB"
 
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf &>> $LOGS_FILE
 VALIDATE $? "Allowing Remote Connections"
 
-systemctl restart mongodb &>> $LOGS_FILE
+systemctl restart mongod &>> $LOGS_FILE
 VALIDATE $? "Restarted MongoDB"
 
 
