@@ -65,18 +65,32 @@ systemctl enable catalogue &>> $LOGS_FILE
 systemctl start catalogue &>> $LOGS_FILE
 VALIDATE $? "Starting catalogue"
 
+# Copy Mongo repo
 cp mongo.repo /etc/yum.repos.d/mongodb.repo &>> $LOGS_FILE
-dnf install $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongodb.repo mongodb-mongosh -y
+VALIDATE $? "Copying Mongo Repo"
 
-INDEX=$(mongosh --host localhost --quiet --eval "db.getMongo().getDB('catalogue')")
+# Install MongoDB Server
+dnf install mongodb-org -y &>> $LOGS_FILE
+VALIDATE $? "Installing MongoDB Server"
 
-if [ $? -le = 0 ]; then
-  mongosh --host localhost </app/db/master-data.js 
+# Start MongoDB
+systemctl enable mongod &>> $LOGS_FILE
+systemctl start mongod &>> $LOGS_FILE
+VALIDATE $? "Starting MongoDB"
+
+# Install Mongo Shell
+dnf install mongodb-mongosh -y &>> $LOGS_FILE
+VALIDATE $? "Installing Mongo Shell"
+
+# Check if products collection exists
+INDEX=$(mongosh --host localhost --quiet --eval "db.getMongo().getDB('catalogue').getCollectionNames().indexOf('products')")
+
+if [ -z "$INDEX" ] || [ "$INDEX" -lt 0 ]; then
+  mongosh --host localhost </app/db/master-data.js &>> $LOGS_FILE
   VALIDATE $? "Loading catalogue data"
 else
-echo -e products are already loaded ... $Y SKIPPING $N
+  echo -e "Products already loaded ... $Y SKIPPING $N" | tee -a $LOGS_FILE
 fi
 
 systemctl restart catalogue &>> $LOGS_FILE
 VALIDATE $? "Restarting catalogue"
-
