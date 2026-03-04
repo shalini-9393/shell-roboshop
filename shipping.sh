@@ -37,11 +37,14 @@ if [ $? -ne 0 ]; then
 else
     echo -e "$G shipping roboshop already exists $N"
 fi
-mkdir /app &>> $LOGS_FILE
+mkdir -p /app &>> $LOGS_FILE
 VALIDATE $? "Creating App Directory"
 
 curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip &>> $LOGS_FILE
 VALIDATE $? "Downloading shipping"
+
+chown -R roboshop:roboshop /app &>> $LOGS_FILE
+VALIDATE $? "Giving Permissions"
 
 cd /app &>> $LOGS_FILE
 VALIDATE $? "Moving to app directory"
