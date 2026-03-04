@@ -27,7 +27,7 @@ VALIDATE() {
 }
 
 dnf module disable redis -y &>> $LOGS_FILE
-dnf module enable redis:7 -y &>> $LOGS_FILE
+dnf module enable redis:7 -y 
 VALIDATE $? "Enabling Redis :7"
 
 dnf install redis -y &>> $LOGS_FILE
