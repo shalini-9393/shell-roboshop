@@ -65,7 +65,7 @@ cp $SCRIPT_DIR/cart.service /etc/systemd/system/cart.service
 VALIDATE $? "Created systemctl service"
 
 systemctl daemon-reload &>> $LOGS_FILE
-systemctl enable cart &>> $LOGS_FILE
-systemctl start cart &>> $LOGS_FILE
+systemctl enable cart
+systemctl start cart 
 VALIDATE $? "Starting cart"
 
