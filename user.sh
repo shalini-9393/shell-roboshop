@@ -63,7 +63,7 @@ VALIDATE $? "Installing dependencies"
 cp $SCRIPT_DIR/user.service /etc/systemd/system/user.service
 VALIDATE $? "Created systemctl service"
 
-systemctl daemon-reload
-systemctl enable user &>> $LOGS_FILE
+systemctl daemon-reload &>> $LOGS_FILE
+systemctl enable user 
 systemctl start user
 VALIDATE $? "Starting and Enabling user"
