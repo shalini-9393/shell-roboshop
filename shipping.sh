@@ -31,13 +31,14 @@ dnf install maven -y &>> $LOGS_FILE
 VALIDATE $? "Installed maven"
 
 id roboshop &>> $LOGS_FILE
-if [ $? -ne 0 ]; then
-    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system shipping" roboshop
-    VALIDATE $? "Creating system shipping"
-else
+
     echo -e "$G shipping roboshop already exists $N"
-fi
+
 mkdir -p /app &>> $LOGS_FILE
+if [ ! -f "$SCRIPT_DIR/shipping.service" ]; then
+    echo -e "$R shipping.service file not found in $SCRIPT_DIR $N"
+    exit 1
+    
 VALIDATE $? "Creating App Directory"
 
 curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip &>> $LOGS_FILE
@@ -68,9 +69,7 @@ VALIDATE $? "Created systemctl service"
 dnf install mysql -y &>> $LOGS_FILE
 VALIDATE $? "Installing MySQL"
 
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql &>> $LOGS_FILE
 if [ $? -ne 0 ]; then
-
 mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql &>> $LOGS_FILE
 mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql &>> $LOGS_FILE
 mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql &>> $LOGS_FILE
@@ -78,6 +77,7 @@ VALIDATE $? "loaded data into MySQL"
 else
     echo -e "data is already loaded ... $Y SKIPPING $N"
 fi
+systemctl deamon-reload 
 systemctl enable shipping 
 systemctl start shipping
 VALIDATE $? "Enabled and started shipping"
