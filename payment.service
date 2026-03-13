@@ -1,0 +1,15 @@
+[Unit]
+Description=Payment Service
+
+[Service]
+User=roboshop
+Environment=REDIS_HOST=redis
+Environment=MONGO_HOST=mongodb
+Environment=RABBITMQ_HOST=rabbitmq
+Environment=RABBITMQ_USER=roboshop
+Environment=RABBITMQ_PASSWORD=roboshop
+ExecStart=/usr/bin/python3 /app/payment.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
