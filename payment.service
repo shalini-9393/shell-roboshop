@@ -2,6 +2,7 @@
 Description=Payment Service
 
 [Service]
+<<<<<<< HEAD
 User=root
 WorkingDirectory=/app
 // highlight-start
@@ -20,3 +21,16 @@ SyslogIdentifier=payment
 
 [Install]
 WantedBy=multi-user.target
+=======
+User=roboshop
+Environment=REDIS_HOST=redis
+Environment=MONGO_HOST=mongodb
+Environment=RABBITMQ_HOST=rabbitmq
+Environment=RABBITMQ_USER=roboshop
+Environment=RABBITMQ_PASSWORD=roboshop
+ExecStart=/usr/bin/python3 /app/payment.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+>>>>>>> 276ba82498b2fa04bd858c85a94b6abdbf55bd12
