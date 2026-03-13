@@ -38,9 +38,13 @@ dnf module enable nginx:1.24 -y &>>$LOGS_FILE
 dnf install nginx -y &>>$LOGS_FILE
 VALIDATE $? "Installing Nginx"
 
+# Enable Nginx service
 systemctl enable nginx &>>$LOGS_FILE
+VALIDATE $? "Enabled Nginx"
+
+# Start Nginx service
 systemctl start nginx &>>$LOGS_FILE
-VALIDATE $? "Enabled and Started Nginx"
+VALIDATE $? "Started Nginx"
 
 # --------------------------
 # Remove default Nginx content
