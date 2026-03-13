@@ -50,3 +50,4 @@ aws route53 change-resource-record-sets \
   }"
 echo "record updated for $instance: $RECORD_NAME -> $IP"
 donedevops test
+devops test
